@@ -1,7 +1,7 @@
 import { PregnantWoman } from "@mui/icons-material";
 import moment from "moment";
 import { Assignment, SlotAssignments } from ".";
-import { UserAssignmentsHistory } from "../history";
+import { UserAssignmentsScores } from "../history";
 import { UserPreferences } from "../preference/user.preferences";
 import { Slot } from "../slot";
 import { User } from "../user/user";
@@ -12,7 +12,7 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         private readonly users: User[],
         private readonly slots: Slot[],
         private readonly usersPreferences: UserPreferences[],
-        private readonly history: UserAssignmentsHistory[],
+        private readonly history: UserAssignmentsScores[]
     ) { };
     async assign(): Promise<Assignment> {
         const slotsSortedByPriority = this.sortSlotsbyPreferncesCoefficient(this.getPreferencesNumberPerDate());
@@ -99,7 +99,7 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         })
     }
 
-    private getHistoryOfUser(user: User): UserAssignmentsHistory {
+    private getHistoryOfUser(user: User): UserAssignmentsScores {
         return this.history.find((u) => {
             return u.userId == user.id
         })

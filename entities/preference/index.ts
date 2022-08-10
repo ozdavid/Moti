@@ -1,3 +1,4 @@
 export interface Preference {
-    date : Date;
+    date: Date;
+    userId: string;
 }

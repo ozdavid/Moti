@@ -17,6 +17,7 @@ export default function Layout({ children, user }) {
                     {user?.name?.charAt?.(0)}
                 </Avatar>
                 {user ? <Typography style={{ flexGrow: 1 }}>שלום {user.name} 👋 </Typography> : <></>}
+                <img src="/logo.svg" style={{width:"100px"}}></img>
             </Toolbar>
         </AppBar>
         {children}
