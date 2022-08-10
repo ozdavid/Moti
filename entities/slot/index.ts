@@ -8,6 +8,7 @@ export interface Slot {
 
 export const slotTypes = [
     "weekend",
-    "default"
+    "default",
+    "holiday"
 ] as const;
 export type SlotType = typeof slotTypes[number];
