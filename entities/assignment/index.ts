@@ -1,7 +1,7 @@
 import { Slot } from "../slot";
 
 export interface Assignment {
-    slots: SlotAssignments;
+    slots: SlotAssignments[];
 }
 
 interface SlotAssignments extends Slot {
