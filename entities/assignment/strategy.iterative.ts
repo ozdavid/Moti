@@ -14,6 +14,7 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         private readonly usersPreferences: UserPreferences[],
         private readonly history: UserAssignmentsScores[]
     ) { };
+    // TODO: add assignment to history of user
     async assign(): Promise<Assignment> {
         const slotsSortedByPriority = this.sortSlotsbyPreferncesCoefficient(this.getPreferencesNumberPerDate());
         const assignments: SlotAssignments[] = []
