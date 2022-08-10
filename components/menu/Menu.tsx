@@ -1,9 +1,12 @@
-import { Avatar, Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from "@mui/material";
+import { Avatar, Box, Divider, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useTheme } from "@mui/material";
 import { withStyles, WithStyles } from "@mui/styles";
 import { useRouter } from "next/router";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useState } from "react";
 import { views } from './consts';
+import { Drawer, DrawerHeader } from "./styledComponents";
 import { styles } from "./styles";
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 
 interface MenuProps extends WithStyles<typeof styles> {
@@ -14,35 +17,55 @@ interface MenuProps extends WithStyles<typeof styles> {
 const Menu: FunctionComponent<MenuProps> = props => {
     const { classes, user, className } = props;
     const router = useRouter();
+    const theme = useTheme();
+
+    const [open, setOpen] = useState(false);
+
+    const handleDrawrHeaderClick = () => {
+        setOpen(!open)
+    }
 
     const changeRoute = (route: string) => {
         router.push(route)
     };
 
     return (
-        <Box className={`${classes.root} ${className}`}>
-            <Toolbar />
+        <Drawer variant="permanent" anchor="right" open={open} className={`${classes.root} ${className}`}>
+            <DrawerHeader>
+                <IconButton onClick={handleDrawrHeaderClick}>
+                    {open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                </IconButton>
+            </DrawerHeader>
+
             <Divider />
+
             <List>
                 {views.map(view => (
                     <ListItem key={view.label} disablePadding>
                         <ListItemButton onClick={() => changeRoute(view.route)}>
-                            <ListItemIcon>
+                            <ListItemIcon sx={{
+                                minWidth: 0,
+                                mr: open ? 3 : 'auto',
+                                justifyContent: 'center',
+                            }}>
                                 {view.icon}
                             </ListItemIcon>
-                            <ListItemText primary={view.label} />
+                            {open ? <ListItemText primary={view.label} /> : null}
                         </ListItemButton>
                     </ListItem>
                 ))}
             </List>
-
-            <Box className={classes.avatar}>
-                <Avatar>
-                    {user?.name?.charAt?.(0)}
-                </Avatar>
-                {user ? <Typography className={classes.username}>{user.name}</Typography> : null}
-            </Box>
-        </Box>)
+            {
+                open ?
+                    <Box className={classes.avatar}>
+                        <Avatar>
+                            {user?.name?.charAt?.(0)}
+                        </Avatar>
+                        {user ? <Typography className={classes.username}>{user.name}</Typography> : null}
+                    </Box> : null
+            }
+        </Drawer>
+    )
 }
 
 export default withStyles(styles)(Menu);
