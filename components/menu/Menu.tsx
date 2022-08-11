@@ -30,9 +30,13 @@ const Menu: FunctionComponent<MenuProps> = props => {
     };
 
     return (
-        <Drawer variant="permanent" anchor="right" open={open} className={`${classes.root} ${className}`}>
+        <Drawer
+            variant="permanent"
+            anchor="right"
+            open={open}
+            className={`${classes.root} ${className}`}>
             <DrawerHeader>
-                <IconButton onClick={handleDrawrHeaderClick}>
+                <IconButton onClick={handleDrawrHeaderClick} sx={{color: 'white'}}>
                     {open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                 </IconButton>
             </DrawerHeader>
@@ -41,16 +45,17 @@ const Menu: FunctionComponent<MenuProps> = props => {
 
             <List>
                 {views.map(view => (
-                    <ListItem key={view.label} disablePadding>
+                    <ListItem key={view.label} disablePadding sx={{color: 'white'}}>
                         <ListItemButton onClick={() => changeRoute(view.route)}>
                             <ListItemIcon sx={{
                                 minWidth: 0,
                                 mr: open ? 3 : 'auto',
                                 justifyContent: 'center',
+                                color: 'white'
                             }}>
                                 {view.icon}
                             </ListItemIcon>
-                            {open ? <ListItemText primary={view.label} /> : null}
+                            {open ? <ListItemText primary={view.label}/> : null}
                         </ListItemButton>
                     </ListItem>
                 ))}
