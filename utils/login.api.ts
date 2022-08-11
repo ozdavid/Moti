@@ -1,3 +1,5 @@
+import { User } from "../entities/user/user";
+
 export const login = async (username, passphrase) => {
     const response = await fetch(`/api/users/${username}?passphrase=${passphrase}`);
     if (response.status !== 200) {
@@ -5,7 +7,7 @@ export const login = async (username, passphrase) => {
     }
 };
 
-export const getAllUsers = async () =>
+export const getAllUsers = async ():Promise<User[]> =>
     (await fetch("/api/users")).json();
 
 export const getAllTeams = async () =>

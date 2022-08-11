@@ -1,12 +1,19 @@
-import { ThemeProvider } from '@mui/material';
-import Head from 'next/head';
-import { useState } from 'react';
-import Layout from '../components/layout';
-import '../styles/globals.css';
-import { theme } from '../utils/theme';
-
+import { ThemeProvider } from "@mui/material";
+import Head from "next/head";
+import { useState } from "react";
+import Layout from "../components/layout";
+import { signIn } from "../entities/user/user.dal";
+import "../styles/globals.css";
+import { theme } from "../utils/theme";
+import SignIn from "./login";
+import { isNil } from "ramda";
+import { User } from "../entities/user/user";
 export default function MyApp({ Component, pageProps }) {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState<User>();
+  const onSignIn = async (id: string, password: string) => {
+    const user = await signIn(id, password);
+    if (!isNil(user)) setUser(user);
+  };
   return (
     <>
       <Head>
@@ -37,9 +44,13 @@ export default function MyApp({ Component, pageProps }) {
         <meta name="theme-color" content="#00838f" />
       </Head>
       <ThemeProvider theme={theme}>
-        <Layout user={user}>
-          <Component {...pageProps} user={user} setUser={setUser} />
-        </Layout>
+        {user ? (
+          <Layout user={user}>
+            <Component {...pageProps} user={user} setUser={setUser} />
+          </Layout>
+        ) : (
+          <SignIn onSignIn={onSignIn}></SignIn>
+        )}
       </ThemeProvider>
     </>
   );
