@@ -10,7 +10,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const [user, setUser] = useState();
   return (
     <div>
-      <Head children={''}>
+      <Head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta

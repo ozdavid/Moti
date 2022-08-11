@@ -11,11 +11,10 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 interface MenuProps extends WithStyles<typeof styles> {
     user: any;
-    className: string
 }
 
 const Menu: FunctionComponent<MenuProps> = props => {
-    const { classes, user, className } = props;
+    const { classes, user } = props;
     const router = useRouter();
     const theme = useTheme();
 
@@ -34,7 +33,7 @@ const Menu: FunctionComponent<MenuProps> = props => {
             variant="permanent"
             anchor="right"
             open={open}
-            className={`${classes.root} ${className}`}>
+            className={classes.root}>
             <DrawerHeader>
                 <IconButton onClick={handleDrawrHeaderClick} sx={{color: 'white'}}>
                     {open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
