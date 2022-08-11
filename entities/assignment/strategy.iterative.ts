@@ -9,12 +9,72 @@ import { AssignmentStrategy } from "./strategy";
 
 export class IterativeAssignmentStrategy implements AssignmentStrategy {
     constructor(
-        private readonly users: User[],
-        private readonly slots: Slot[],
-        private readonly usersPreferences: UserPreferences[],
-        private readonly history: UserAssignmentsScores[]
-    ) { };
-    // TODO: add assignment to history of user
+        private users: User[],
+        private slots: Slot[],
+        private usersPreferences: UserPreferences[],
+        private history: UserAssignmentsScores[]
+    ) { 
+        this.users = [{
+            id: "123",
+            name: "nir",
+            joinedAt: new Date('2022-08-01')
+        },
+        {
+            id: "456",
+            name: "alex",
+            joinedAt: new Date('2022-08-01')
+        },
+        {
+            id: "789",
+            name: "matan",
+            joinedAt: new Date('2022-08-01')
+        }];
+
+        this.slots = [{
+            capcacity: 1,
+            date: new Date('2022-08-07'),
+            index:1,
+            type:"default",
+        },{
+            capcacity: 1,
+            date: new Date('2022-08-08'),
+            index:2,
+            type:"default",
+        },{
+            capcacity: 1,
+            date: new Date('2022-08-09'),
+            index:3,
+            type:"default",
+        },];
+
+        this.usersPreferences = [{
+            userId: "123",
+            dates: [new Date('2022-08-07')],
+        }];
+
+        this.history = [{
+            userId: "123",
+            "default": 0,
+            "weekend": 0,
+            "holiday": 0
+        },
+        {
+            userId: "456",
+            "default": 0,
+            "weekend": 0,
+            "holiday": 0
+        },
+        {
+            userId: "789",
+            "default": 0,
+            "weekend": 0,
+            "holiday": 0
+        }];
+
+        const result = this.assign();
+        console.log(result);
+    };
+
     async assign(): Promise<Assignment> {
         const slotsSortedByPriority = this.sortSlotsbyPreferncesCoefficient(this.getPreferencesNumberPerDate());
         const assignments: SlotAssignments[] = []
@@ -131,4 +191,5 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
             ass.assignedUsersIds.includes(user.id)
         })
     }
+
 }
