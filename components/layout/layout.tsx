@@ -11,10 +11,10 @@ interface LayoutProps extends WithStyles<typeof styles> {
 const Layout: FunctionComponent<LayoutProps> = props => {
     const { user, children, classes } = props;
 
-    return <Box className={classes.root}>
+    return <Box className={classes.root} display='flex'>
         <Menu user={user} />
 
-        <Box className={classes.main}>
+        <Box className={classes.main} sx={{ flexGrow: 1 }}>
             {children}
         </Box>
     </Box>;
