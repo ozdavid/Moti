@@ -1,4 +1,5 @@
 import moment from "moment";
+import { difference } from "ramda";
 import { Assignment } from ".";
 import { createEmptyUserAssignmentsScores, UserAssignmentsScores } from "../history";
 import { PreferencesDal } from "../preference/dal";
@@ -31,7 +32,7 @@ export class AssignmentsManager {
         const usersScores = this.calculateScores(slots, entireAssignmentsHistory, allUsers);
 
         const assignmentStrategy = new IterativeAssignmentStrategy(
-            slots, currWindowPreferences, usersScores
+            allUsers, slots, currWindowPreferences, usersScores
         );
 
         return assignmentStrategy.assign();
@@ -47,6 +48,7 @@ export class AssignmentsManager {
             return amountsPerType;
         });
 
+        const usersWithoutAssignments = difference(allUsers.map(u => u.id), historicalAssignmentsAmountsPerUser.map(x => x.userId));
         return historicalAssignmentsAmountsPerUser.map(userAmounts => {
             const userJoinedAt = allUsers.find(user => user.id == userAmounts.userId).joinedAt;
             const amountOfMonthsSinceJoin = moment().diff(userJoinedAt, "months");
@@ -56,6 +58,6 @@ export class AssignmentsManager {
                 holiday: userAmounts.holiday / amountOfMonthsSinceJoin,
                 weekend: userAmounts.weekend / amountOfMonthsSinceJoin,
             });
-        });
+        }).concat(usersWithoutAssignments.map(createEmptyUserAssignmentsScores));
     }
 }

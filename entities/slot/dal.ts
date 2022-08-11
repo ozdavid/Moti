@@ -12,6 +12,11 @@ export class SlotsDal {
             ]
         }).toArray() as Slot[];
     }
+
+    async addSlots(slots: Slot[]) {
+        const collection = await getCollection(collectionName);
+        await collection.insertMany(slots);
+    }
 }
 
 const collectionName = "slots";
