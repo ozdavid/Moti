@@ -1,13 +1,14 @@
-import { getUser } from "../../../../entities/team/teams.dal";
+import { UsersDal } from "../../../../entities/user/dal";
+
+
 
 
 
 export default async (req, res) => {
-    const { username, passphrase } = req.query;
-    const userFromDb = await getUser(username);
-    if (userFromDb) {
-        res.status(200).send();
-    } else {
-        res.status(401).send();
+    if (req.query.userId) {
+        const usersDal = new UsersDal();
+        const user = await usersDal.getUser(req.query.userId);
+
+        res.status(200).json(user);
     }
 };

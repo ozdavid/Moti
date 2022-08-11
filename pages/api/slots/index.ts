@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { Slot } from "../../../entities/slot";
 import { SlotsDal } from "../../../entities/slot/dal";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
@@ -13,14 +14,19 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 
-const handlePost = (req: NextApiRequest, res: NextApiResponse) => {
-
+const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
+    const slots: Slot[] = JSON.parse(req.body);
+    const slotsDal = new SlotsDal();
+    await slotsDal.addSlots(slots);
+    res.status(200).send("");
 };
-const handleGet = (req: NextApiRequest, res: NextApiResponse) => {
+const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.query.from && req.query.until) {
-        // const fromDate = new Date(req.query.from)
+        const fromDate = new Date(req.query.from as string);
+        const untilDate = new Date(req.query.until as string);
         const slotsDal = new SlotsDal();
-        // slotsDal.getSlots();
+        const slots = await slotsDal.getSlots(fromDate, untilDate);
+        res.status(200).json(slots);
     } else {
         res.status(400).send("");
     }
