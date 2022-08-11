@@ -11,6 +11,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const currentWindowEnd = now.endOf("month").toDate();
 
         const userAssignments = await assignmentsDal.getAssignmentsHistoryOfUser(userId, currentWindowStart, currentWindowEnd);
+        res.status(200).json(userAssignments);
     } else {
         res.status(400).send("");
     }
