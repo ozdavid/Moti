@@ -16,7 +16,8 @@ export const styles = (theme: Theme) => createStyles({
   },
 
   username: {
-    paddingRight: '5px'
+    paddingRight: '5px',
+    color: 'white'
   }
 });
 
