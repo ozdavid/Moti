@@ -37,14 +37,14 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         this.slots.forEach((slot) => {
             let find = false;
             preferencePerDate.forEach((currPref) => {
-                if(slot.index == currPref.slot.index) {
+                if (slot.index == currPref.slot.index) {
                     finalPrefs.push(currPref);
                     find = true;
                 }
             });
 
-            if(!find) {
-                finalPrefs.push({"slot":slot, "amount": this.getAmountOfAvialbleUsers(0)});
+            if (!find) {
+                finalPrefs.push({ "slot": slot, "amount": this.getAmountOfAvialbleUsers(0) });
             }
         });
 
@@ -139,17 +139,18 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         return assignments.some(assignment => assignment.assignedUsersIds.includes(user.id));
     }
 
-    private sortAssignedUsersByDate(users: User[], assignments: SlotAssignments[]): User[] {
+    private sortAssignedUsersByDate(users: User[], slots: SlotAssignments[]): User[] {
         return users.sort((user1, user2) => {
-            const firstAssignment = this.findAssignmentOfUser(user1, assignments);
-            const secondAssignment = this.findAssignmentOfUser(user2, assignments);
+            const firstAssignment = this.findAssignmentOfUser(user1, slots);
+            const secondAssignment = this.findAssignmentOfUser(user2, slots);
             return firstAssignment.date.getTime() - secondAssignment.date.getTime();
         });
     }
 
-    private findAssignmentOfUser(user: User, assignments: SlotAssignments[]) {
-        return assignments.find((ass) => {
-            ass.assignedUsersIds.includes(user.id);
-        });
+    private findAssignmentOfUser(user: User, slots: SlotAssignments[]) {
+        return slots.find((slot) => 
+            slot.assignedUsersIds.includes(user.id)
+        );
     }
+
 }
