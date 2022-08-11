@@ -18,7 +18,7 @@ const handlePost = (req: NextApiRequest, res: NextApiResponse) => {
 };
 const handleGet = (req: NextApiRequest, res: NextApiResponse) => {
     if (req.query.from && req.query.until) {
-        const fromDate = new Date(req.query.from)
+        // const fromDate = new Date(req.query.from)
         const slotsDal = new SlotsDal();
         // slotsDal.getSlots();
     } else {
