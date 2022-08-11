@@ -1,6 +1,6 @@
 import { PregnantWoman } from "@mui/icons-material";
 import moment from "moment";
-import { Assignment } from ".";
+import { Assignment, SlotAssignments } from ".";
 import { UserAssignmentsScores } from "../history";
 import { UserPreferences } from "../preference/user.preferences";
 import { Slot } from "../slot";
@@ -14,11 +14,23 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         private readonly usersPreferences: UserPreferences[],
         private readonly history: UserAssignmentsScores[]
     ) { };
-    assign(): Promise<Assignment> {
+    // TODO: add assignment to history of user
+    async assign(): Promise<Assignment> {
         const slotsSortedByPriority = this.sortSlotsbyPreferncesCoefficient(this.getPreferencesNumberPerDate());
+        const assignments: SlotAssignments[] = []
         slotsSortedByPriority.forEach((slot) => {
-            
+            const users = this.sortPotentialByHistoryAndPref(slot.slot);
+            const assignedUsers = users.filter((user) => this.isUserAlreadyAssigned(user, assignments))
+            const assignedUsersSortedByDate = this.sortAssignedUsersByDate(assignedUsers, assignments);
+            const notAssignedUsers = users.filter((user) => !this.isUserAlreadyAssigned(user, assignments));
+            const potential = notAssignedUsers.concat(assignedUsersSortedByDate)
+            const assignedUserIdsToSlot: string[] = [];
+            for (let i = 0; i < slot.slot.capcacity; i++) {
+                assignedUserIdsToSlot.push(potential[i].id);
+            }
+            assignments.push({...slot.slot, assignedUsersIds: assignedUserIdsToSlot})
         })
+        return { slots: assignments }
     }
 
     private getPreferencesNumberPerDate(): {slot: Slot, amount: number}[] {
@@ -67,7 +79,6 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         })
     }
 
-
     private isSlotInUserPref(user: User, slot: Slot): boolean {
         const userPrefs = this.usersPreferences.find((pref) => {
             return pref.userId == user.id;
@@ -89,7 +100,7 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         })
     }
 
-    private getHistoryOfUser(user: User): UserAssignmentsHistory {
+    private getHistoryOfUser(user: User): UserAssignmentsScores {
         return this.history.find((u) => {
             return u.userId == user.id
         })
@@ -102,5 +113,22 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         const sortedUnavailbleUsers = this.sortUsersByHistory(unavailibleUser, slot)
         return sortedAvailibleUsers.concat(sortedUnavailbleUsers)
     }
-}
 
+    private isUserAlreadyAssigned(user: User, assignments: SlotAssignments[]): boolean {
+        return assignments.some(assignment=> assignment.assignedUsersIds.includes(user.id))
+    }
+
+    private sortAssignedUsersByDate(users: User[], assignments: SlotAssignments[]): User[] {
+        return users.sort((user1, user2) => {
+            const firstAssignment = this.findAssignmentOfUser(user1, assignments)
+            const secondAssignment = this.findAssignmentOfUser(user2, assignments)
+            return firstAssignment.date.getTime() - secondAssignment.date.getTime()
+        })
+    }
+
+    private findAssignmentOfUser(user: User, assignments: SlotAssignments[]) {
+        return assignments.find((ass) => {
+            ass.assignedUsersIds.includes(user.id)
+        })
+    }
+}

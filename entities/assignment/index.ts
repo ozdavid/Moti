@@ -4,6 +4,6 @@ export interface Assignment {
     slots: SlotAssignments[];
 }
 
-interface SlotAssignments extends Slot {
+export interface SlotAssignments extends Slot {
     assignedUsersIds: string[];
 }
