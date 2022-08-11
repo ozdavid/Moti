@@ -1,4 +1,3 @@
-import { PregnantWoman } from "@mui/icons-material";
 import moment from "moment";
 import { Assignment, SlotAssignments } from ".";
 import { UserAssignmentsScores } from "../history";
@@ -12,184 +11,145 @@ export class IterativeAssignmentStrategy implements AssignmentStrategy {
         private users: User[],
         private slots: Slot[],
         private usersPreferences: UserPreferences[],
-        private history: UserAssignmentsScores[]
-    ) { 
-        this.users = [{
-            id: "123",
-            name: "nir",
-            joinedAt: new Date('2022-08-01')
-        },
-        {
-            id: "456",
-            name: "alex",
-            joinedAt: new Date('2022-08-01')
-        },
-        {
-            id: "789",
-            name: "matan",
-            joinedAt: new Date('2022-08-01')
-        }];
-
-        this.slots = [{
-            capcacity: 1,
-            date: new Date('2022-08-07'),
-            index:1,
-            type:"default",
-        },{
-            capcacity: 1,
-            date: new Date('2022-08-08'),
-            index:2,
-            type:"default",
-        },{
-            capcacity: 1,
-            date: new Date('2022-08-09'),
-            index:3,
-            type:"default",
-        },];
-
-        this.usersPreferences = [{
-            userId: "123",
-            dates: [new Date('2022-08-07')],
-        }];
-
-        this.history = [{
-            userId: "123",
-            "default": 0,
-            "weekend": 0,
-            "holiday": 0
-        },
-        {
-            userId: "456",
-            "default": 0,
-            "weekend": 0,
-            "holiday": 0
-        },
-        {
-            userId: "789",
-            "default": 0,
-            "weekend": 0,
-            "holiday": 0
-        }];
-
-        const result = this.assign();
-        console.log(result);
-    };
+        private history: UserAssignmentsScores[]) { };
 
     async assign(): Promise<Assignment> {
-        const slotsSortedByPriority = this.sortSlotsbyPreferncesCoefficient(this.getPreferencesNumberPerDate());
-        const assignments: SlotAssignments[] = []
+        const slotsSortedByPriority = this.sortSlotsbyPreferncesCoefficient(this.getPreferencesForAllSlots(this.getPreferencesNumberPerDate()));
+        const assignments: SlotAssignments[] = [];
         slotsSortedByPriority.forEach((slot) => {
             const users = this.sortPotentialByHistoryAndPref(slot.slot);
-            const assignedUsers = users.filter((user) => this.isUserAlreadyAssigned(user, assignments))
+            const assignedUsers = users.filter((user) => this.isUserAlreadyAssigned(user, assignments));
             const assignedUsersSortedByDate = this.sortAssignedUsersByDate(assignedUsers, assignments);
             const notAssignedUsers = users.filter((user) => !this.isUserAlreadyAssigned(user, assignments));
-            const potential = notAssignedUsers.concat(assignedUsersSortedByDate)
+            const potential = notAssignedUsers.concat(assignedUsersSortedByDate);
             const assignedUserIdsToSlot: string[] = [];
             for (let i = 0; i < slot.slot.capcacity; i++) {
                 assignedUserIdsToSlot.push(potential[i].id);
             }
-            assignments.push({...slot.slot, assignedUsersIds: assignedUserIdsToSlot})
-        })
-        return { slots: assignments }
+            assignments.push({ ...slot.slot, assignedUsersIds: assignedUserIdsToSlot });
+        });
+        return { slots: assignments };
     }
 
-    private getPreferencesNumberPerDate(): {slot: Slot, amount: number}[] {
-        const allPreferences = this.usersPreferences.map(user=>user.dates).flat();
-        const amountOfPreferencesPerDate: Record<string,number> = allPreferences.reduce((acc, currPreference) => {
-            if(!acc[currPreference.toISOString()])
-                acc[currPreference.toISOString()]=0;
+    private getPreferencesForAllSlots(preferencePerDate: { slot: Slot, amount: number; }[]) {
+        const finalPrefs = [];
+
+        this.slots.forEach((slot) => {
+            let find = false;
+            preferencePerDate.forEach((currPref) => {
+                if(slot.index == currPref.slot.index) {
+                    finalPrefs.push(currPref);
+                    find = true;
+                }
+            });
+
+            if(!find) {
+                finalPrefs.push({"slot":slot, "amount": this.getAmountOfAvialbleUsers(0)});
+            }
+        });
+
+        return finalPrefs;
+    }
+
+    private getPreferencesNumberPerDate(): { slot: Slot, amount: number; }[] {
+        const allPreferences = this.usersPreferences.map(user => user.dates).flat();
+
+        const amountOfPreferencesPerDate: Record<string, number> = allPreferences.reduce((acc, currPreference) => {
+            if (!acc[currPreference.toISOString()]) {
+                acc[currPreference.toISOString()] = 0;
+            }
+
             acc[currPreference.toISOString()]++;
-            
-            return acc
-        },{});
-        
-        return Object.entries(amountOfPreferencesPerDate).map(([dateString, amount])=>({
-            slot: this.slots.find(slot => slot.date.toISOString()==dateString),
+
+            return acc;
+        }, {});
+
+        return Object.entries(amountOfPreferencesPerDate).map(([dateString, amount]) => ({
+            slot: this.slots.find(slot => slot.date.toISOString() == dateString),
             amount: this.getAmountOfAvialbleUsers(amount)
         }));
     }
 
     private getAmountOfAvialbleUsers(amount: number) {
-        return this.users.length - amount
+        return this.users.length - amount;
     }
 
-    private sortSlotsbyPreferncesCoefficient(amountOfPreferencesPerDate: {slot: Slot, amount: number}[]): {slot: Slot, amount: number}[] {
-        return amountOfPreferencesPerDate.sort((a: {slot: Slot, amount: number}, b: {slot: Slot, amount: number}) => {
+    private sortSlotsbyPreferncesCoefficient(amountOfPreferencesPerDate: { slot: Slot, amount: number; }[]): { slot: Slot, amount: number; }[] {
+        return amountOfPreferencesPerDate.sort((a: { slot: Slot, amount: number; }, b: { slot: Slot, amount: number; }) => {
             return (a.amount / a.slot.capcacity) - (b.amount / b.slot.capcacity);
-        })
+        });
     }
 
     private getAvailibleUsers(slot: Slot): User[] {
         return this.users.filter((user) => {
             if (this.isUserHasPref(user)) {
-                return !this.isSlotInUserPref(user, slot)
+                return !this.isSlotInUserPref(user, slot);
             } else {
                 return true;
             }
-        })
+        });
     }
 
     private getUnavailibleUsers(slot: Slot): User[] {
         return this.users.filter((user) => {
             if (this.isUserHasPref(user)) {
-                return this.isSlotInUserPref(user, slot)
+                return this.isSlotInUserPref(user, slot);
             } else {
                 return false;
             }
-        })
+        });
     }
 
     private isSlotInUserPref(user: User, slot: Slot): boolean {
         const userPrefs = this.usersPreferences.find((pref) => {
             return pref.userId == user.id;
-        })
-        return userPrefs.dates.some(date=> moment(date).isSame(slot.date))
+        });
+        return userPrefs.dates.some(date => moment(date).isSame(slot.date));
     }
 
     private isUserHasPref(user: User): boolean {
-       const prefsOfUser = this.usersPreferences.filter((pref) => {
+        const prefsOfUser = this.usersPreferences.filter((pref) => {
             return pref.userId == user.id;
-        })
+        });
         if (prefsOfUser.length == 0) return false;
         else return true;
     }
 
     private sortUsersByHistory(users: User[], slot: Slot): User[] {
         return users.sort((user1, user2) => {
-            return this.getHistoryOfUser(user1)[slot.type] - this.getHistoryOfUser(user2)[slot.type]
-        })
+            return this.getHistoryOfUser(user1)[slot.type] - this.getHistoryOfUser(user2)[slot.type];
+        });
     }
 
     private getHistoryOfUser(user: User): UserAssignmentsScores {
         return this.history.find((u) => {
-            return u.userId == user.id
-        })
+            return u.userId == user.id;
+        });
     }
 
-    private sortPotentialByHistoryAndPref(slot: Slot):  User[]{
+    private sortPotentialByHistoryAndPref(slot: Slot): User[] {
         const availibleUsers = this.getAvailibleUsers(slot);
         const unavailibleUser = this.getUnavailibleUsers(slot);
-        const sortedAvailibleUsers = this.sortUsersByHistory(availibleUsers, slot)
-        const sortedUnavailbleUsers = this.sortUsersByHistory(unavailibleUser, slot)
-        return sortedAvailibleUsers.concat(sortedUnavailbleUsers)
+        const sortedAvailibleUsers = this.sortUsersByHistory(availibleUsers, slot);
+        const sortedUnavailbleUsers = this.sortUsersByHistory(unavailibleUser, slot);
+        return sortedAvailibleUsers.concat(sortedUnavailbleUsers);
     }
 
     private isUserAlreadyAssigned(user: User, assignments: SlotAssignments[]): boolean {
-        return assignments.some(assignment=> assignment.assignedUsersIds.includes(user.id))
+        return assignments.some(assignment => assignment.assignedUsersIds.includes(user.id));
     }
 
     private sortAssignedUsersByDate(users: User[], assignments: SlotAssignments[]): User[] {
         return users.sort((user1, user2) => {
-            const firstAssignment = this.findAssignmentOfUser(user1, assignments)
-            const secondAssignment = this.findAssignmentOfUser(user2, assignments)
-            return firstAssignment.date.getTime() - secondAssignment.date.getTime()
-        })
+            const firstAssignment = this.findAssignmentOfUser(user1, assignments);
+            const secondAssignment = this.findAssignmentOfUser(user2, assignments);
+            return firstAssignment.date.getTime() - secondAssignment.date.getTime();
+        });
     }
 
     private findAssignmentOfUser(user: User, assignments: SlotAssignments[]) {
         return assignments.find((ass) => {
-            ass.assignedUsersIds.includes(user.id)
-        })
+            ass.assignedUsersIds.includes(user.id);
+        });
     }
-
 }
