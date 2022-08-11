@@ -9,11 +9,7 @@ export const styles = (theme: Theme) => createStyles({
     },
 
     main: {
-        flexGrow: 9,
         padding: '2%',
-    },
-
-    sideMenu: {
         flexGrow: 1,
     },
 });

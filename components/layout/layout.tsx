@@ -12,7 +12,7 @@ const Layout: FunctionComponent<LayoutProps> = props => {
     const { user, children, classes } = props;
 
     return <Box className={classes.root}>
-        <Menu className={classes.sideMenu} user={user} />
+        <Menu user={user} />
 
         <Box className={classes.main}>
             {children}
