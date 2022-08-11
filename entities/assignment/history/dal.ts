@@ -1,6 +1,6 @@
 import { AssignmentHistory } from ".";
+import { Assignment } from "..";
 import { getCollection } from "../../../utils/db";
-import { UserAssignmentsScores } from "../../history";
 
 
 export class UserAssignmentsHistoryDal {
@@ -14,6 +14,17 @@ export class UserAssignmentsHistoryDal {
             ]
         }).toArray() as AssignmentHistory[];
     };
+
+    async getAssignmentsHistoryOfUser(userId: string, from: Date, until: Date) {
+        const collection = await getCollection(collectionName);
+        return await collection.find({
+            userId,
+            $and: [
+                { date: { $gte: from } },
+                { date: { $lte: until } },
+            ]
+        }).toArray() as AssignmentHistory[];
+    }
 
     async getEntireAssignmentsHistoryPerUser(): Promise<UserAssignmentsHistory[]> {
         const collection = await getCollection(collectionName);
@@ -37,6 +48,11 @@ export class UserAssignmentsHistoryDal {
         ]).toArray() as UserAssignmentsHistory[];
     };
 
+    async assign(assignments: Assignment) {
+        const assignmentsHistory: AssignmentHistory[] = assignments.slots.map(slot => slot.assignedUsersIds.map(userId => ({ userId, date: slot.date }))).flat();
+        const collection = await getCollection(collectionName);
+        collection.insertMany(assignmentsHistory);
+    }
 }
 
 const collectionName = "assignments_history";

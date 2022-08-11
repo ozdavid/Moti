@@ -23,7 +23,7 @@ export class AssignmentsManager {
         const currentWindowEnd = now.endOf("month").toDate();
 
         const slots = await this.slotsDal.getSlots(currentWindowStart, currentWindowEnd);
-        const currWindowPreferences = await this.preferencesDal.getUsersPreferences(currentWindowStart, currentWindowEnd);
+        const currWindowPreferences = await this.preferencesDal.getAllUsersPreferencesDuring(currentWindowStart, currentWindowEnd);
 
         const allUsers = await this.usersDal.getAll();
 

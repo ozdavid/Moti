@@ -5,5 +5,5 @@ export interface Assignment {
 }
 
 interface SlotAssignments extends Slot {
-    assignedUsersIds: string;
+    assignedUsersIds: string[];
 }
